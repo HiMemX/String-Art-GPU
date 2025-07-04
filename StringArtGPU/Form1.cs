@@ -61,11 +61,11 @@ namespace StringArtGPU
         public void Prepare()
         {
 
-            string path = "C:\\Users\\felix\\Pictures\\test.jpg";
+            string path = "C:\\Users\\felix\\Pictures\\test.png";
             TargetPic = new GPUImage(path);
 
 
-            nodecount = 200;
+            nodecount = 300;
 
             // Generate node positions
             float ds = 2 * (float)(TargetPic.width + TargetPic.height) / (float)(nodecount - 1);
@@ -146,7 +146,7 @@ namespace StringArtGPU
             CreateDiff.SetInt("nodeindex", startnode);
 
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, TargetPic.ssbo);
-            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, BlurReproducedPic.ssbo);
+            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, ReproducedPic.ssbo);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 2, DiffPic.ssbo);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 3, node_ssbo);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, sortbuffer_ssbo);
@@ -222,7 +222,7 @@ namespace StringArtGPU
             int best = GetBestConnection();
 
             while(lastnodebuffer.Contains(best)) {
-                best = rng.Next(0,nodecount);
+                best++;
             }
 
 

@@ -56,14 +56,16 @@ void main(){
 	float nodedist = length(node1 - node2);
 
 	float dist = abs((node1.y - node2.y) * (column - node1.x) - (node1.x - node2.x) * (row - node1.y)) / nodedist;
-
-	float value = min(1,dist  / 16 + 0.875);
+	
+	float value = min(1,1 * abs(dist) + 0.2);//(abs(dist)  - 1) / 10 + 1);
 	
 	float o = 2;
 	float blurvalue = 1 - 1 / sqrt(2 * 3.141592 * o*o) * exp(-pow(dist / o, 2) / 2);
 	//difference[pixelindex] *= value;
 
+	float a = reproduced[pixelindex] * value;
+	float b = target[pixelindex];
 
-	difference[image * width * height + pixelindex] = pow(reproduced[pixelindex] * blurvalue - target[pixelindex], 2);
+	difference[image * width * height + pixelindex] = pow(a-b, 2);
 
 }

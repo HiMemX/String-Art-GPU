@@ -91,6 +91,7 @@
     <None Include="Shaders\create_diff.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Shaders\precompute_lines.glsl" />
     <None Include="Shaders\reduce.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
