@@ -21,10 +21,16 @@ namespace StringArtGPU
     {
         GLControl glControl;
 
+        int precompute_values_ssbo;
+        int precompute_indices_ssbo;
+        int atomic_counter;
+
         GPUImage TargetPic;
         GPUImage ReproducedPic;
         GPUImage BlurReproducedPic;
         GPUImage DiffPic;
+
+        Shader PrecomputeLinesShader;
 
         Shader CreateDiff;
         Shader Reduce;
@@ -58,12 +64,39 @@ namespace StringArtGPU
 
         }
 
+        private void PrecomputeLines()
+        {
+
+        }
+
+        private void ResetCounter(int ssbo) {
+            uint[] zero = { 0 };
+            GL.BindBuffer(BufferTarget.AtomicCounterBuffer, ssbo);
+            GL.BufferSubData(BufferTarget.AtomicCounterBuffer, IntPtr.Zero, 4, zero);
+        }
+
         public void Prepare()
         {
 
-            string path = "C:\\Users\\felix\\Pictures\\test.png";
+            string path = "C:\\Users\\felix\\Pictures\\pig.png";
             TargetPic = new GPUImage(path);
 
+            int pixelcount = TargetPic.width * TargetPic.height;
+
+            precompute_values_ssbo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ShaderStorageBuffer, precompute_values_ssbo);
+            GL.BufferData(BufferTarget.ShaderStorageBuffer, pixelcount * sizeof(float), new float[pixelcount], BufferUsageHint.DynamicCopy);
+            
+            precompute_indices_ssbo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ShaderStorageBuffer, precompute_indices_ssbo);
+            GL.BufferData(BufferTarget.ShaderStorageBuffer, pixelcount * sizeof(int), new int[pixelcount], BufferUsageHint.DynamicCopy);
+
+
+            atomic_counter = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.AtomicCounterBuffer, atomic_counter);
+            GL.BufferData(BufferTarget.AtomicCounterBuffer, 4, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+
+            ResetCounter(atomic_counter);
 
             nodecount = 300;
 
@@ -106,11 +139,15 @@ namespace StringArtGPU
             BlurReproducedPic = new GPUImage(TargetPic.width, TargetPic.height, Color.White);
             DiffPic = new GPUImage(TargetPic.width, TargetPic.height * (nodecount-1), Color.White);
 
+            PrecomputeLinesShader = new Shader("Shaders\\precompute_lines.glsl");
+
             CreateDiff = new Shader("Shaders\\create_diff.glsl");
             Reduce = new Shader("Shaders\\reduce.glsl");
             AddLine = new Shader("Shaders\\add_line.glsl");
             SortBestConnection = new Shader("Shaders\\sort_best_connection.glsl");
 
+
+            PrecomputeLines();
 
             timer.Interval = 50; // milliseconds (adjust as needed)
             timer.Tick += Timer_Tick;
